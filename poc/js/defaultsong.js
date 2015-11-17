@@ -8,7 +8,7 @@ var defaultSong = {
 		},{
 			id: 1,
 			name: 'Snare',
-			sample: 'snare.mp3'
+			sample: 'Ludwig-Snare-A.wav'
 		},{
 			id: 2,
 			name: 'Hi-Hat Closed',

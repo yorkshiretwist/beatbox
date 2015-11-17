@@ -29,36 +29,48 @@ BeatBox = (function () {
 	function createAudioContext() {
 		try {
 			window.AudioContext = window.AudioContext || window.webkitAudioContext;
-			this.audioContext = new AudioContext();
+			audioContext = new AudioContext();
 		}
 		catch(e) {
 			displayError('Web Audio API is not supported in this browser');
 		}
 	}
 	
-	function loadSample(name, url) {
+	function loadSample(name) {
+		var url = getSampleUrl(name);
 		var request = new XMLHttpRequest();
 		request.open('GET', url, true);
 		request.responseType = 'arraybuffer';
 		request.onload = function() {
-			context.decodeAudioData(request.response, function(buffer) {
-				this.samples.push({ name: name, buffer: buffer });
-			}, onError);
+			audioContext.decodeAudioData(request.response, function(buffer) {
+				samples.push({ name: name, buffer: buffer });
+			}, function(e){
+				displayError(e);
+			});
 		}
 		request.send();
 	}
 	
 	function playSample(name) {
-		var source = context.createBufferSource();
+		var source = audioContext.createBufferSource();
 		source.buffer = getSampleBuffer(name);
-		source.connect(context.destination);
+		source.connect(audioContext.destination);
 		source.start(0);
 	}
 	
+	function getSampleUrl(name){
+		for(var x = 0; x < currentSong.instruments.length; x++){
+			if (currentSong.instruments[x].name == name){
+				return '/beatbox/poc/samples/' + currentSong.instruments[x].sample;
+			}
+		}
+		return undefined;
+	}
+	
 	function getSampleBuffer(name){
-		for(var x = 0; x < this.samples.length; x++){
-			if (this.samples[x].name == name){
-				this.samples[x].buffer;
+		for(var x = 0; x < samples.length; x++){
+			if (samples[x].name == name){
+				return samples[x].buffer;
 			}
 		}
 		return undefined;
@@ -430,7 +442,9 @@ BeatBox = (function () {
 	
 	return {
 		initialize: initialize,
-		loadSong: loadSong
+		loadSong: loadSong,
+		loadSample: loadSample,
+		playSample: playSample
 	}
 });
 var beatBox = new BeatBox();
